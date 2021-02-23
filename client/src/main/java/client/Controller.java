@@ -41,6 +41,7 @@ public class Controller implements Initializable {
     private boolean isAuthenticated;
     private Stage stage;
 
+
     private String nickName;
 
     public void setAuthenticated(boolean authenticated) {
@@ -98,7 +99,12 @@ public class Controller implements Initializable {
                             System.out.println("Client disconnected");
                             break;
                         }
-
+                        if (str.startsWith("/w")) {
+                            String[] text = str.split("\\s", 3);
+                            nickName = text[1];
+                            String message = text[2];
+                            continue;
+                        }
                         textArea.appendText(str + "\n");
                     }
                 } catch (RuntimeException e) {

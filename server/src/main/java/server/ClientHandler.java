@@ -3,6 +3,7 @@ package server;
 import commands.Command;
 
 import java.io.DataInputStream;
+import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -14,8 +15,12 @@ public class ClientHandler {
     private DataOutputStream out;
     private String nickName;
 
+    public Socket getSocket() {
+        return socket;
+    }
+
     public ClientHandler(Server server, Socket socket) {
-        try{
+        try {
             this.server = server;
             this.socket = socket;
             in = new DataInputStream(socket.getInputStream());
@@ -57,6 +62,13 @@ public class ClientHandler {
                             out.writeUTF(Command.END);
                             break;
                         }
+                        if (str.startsWith("/w")) {
+                            String[] text = str.split("\\s", 3);
+                            nickName = text[1];
+                            String message = text[2];
+                            server.sendMsgPrivate(this, nickName, message);
+                            continue;
+                        }
 
                         server.broadcastMsg(this, str);
                     }
@@ -83,7 +95,7 @@ public class ClientHandler {
         return nickName;
     }
 
-    public void sendMsg(String msg){
+    public void sendMsg(String msg) {
         try {
             out.writeUTF(msg);
         } catch (IOException e) {
@@ -91,4 +103,5 @@ public class ClientHandler {
         }
 
     }
+
 }

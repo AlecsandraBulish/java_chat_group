@@ -1,9 +1,6 @@
 package server;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
@@ -56,17 +53,29 @@ public class Server {
         }
     }
 
-    public void broadcastMsg(ClientHandler sender,String msg){
+    public synchronized void broadcastMsg(ClientHandler sender,String msg){
         String massage = String.format("[ %s ]: %s", sender.getNickName(), msg);
         for (ClientHandler c : clients) {
             c.sendMsg(massage);
         }
     }
+
+    public synchronized void sendMsgPrivate(ClientHandler from, String nickNameTo, String msg) {
+        for (ClientHandler o : clients) {
+            if (o.getNickName().equals(nickNameTo)) {
+                o.sendMsg(String.format("[ %s ]: %s",o.getNickName() , msg ));
+                from.sendMsg(msg);
+                return;
+            }
+        }
+    }
+
     public void subscribe(ClientHandler clientHandler) {
         clients.add(clientHandler);
     }
     public void unsubscribe(ClientHandler clientHandler) {
         clients.remove(clientHandler);
     }
+
 
 }
