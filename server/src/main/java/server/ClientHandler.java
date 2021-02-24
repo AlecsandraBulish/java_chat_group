@@ -3,7 +3,6 @@ package server;
 import commands.Command;
 
 import java.io.DataInputStream;
-import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -58,19 +57,21 @@ public class ClientHandler {
                     while (true) {
                         String str = in.readUTF();
 
-                        if (str.equals(Command.END)) {
-                            out.writeUTF(Command.END);
-                            break;
+                        if (str.startsWith("/")) {
+                            if (str.equals(Command.END)) {
+                                out.writeUTF(Command.END);
+                                break;
+                            }
+                            if (str.startsWith("/w")) {
+                                String[] text = str.split(" ", 3);
+                                if (text.length < 3) {
+                                    continue;
+                                }
+                                server.sendMsgPrivate(this, text[1], text[2]);
+                            }
+                        } else {
+                            server.broadcastMsg(this, str);
                         }
-                        if (str.startsWith("/w")) {
-                            String[] text = str.split("\\s", 3);
-                            nickName = text[1];
-                            String message = text[2];
-                            server.sendMsgPrivate(this, nickName, message);
-                            continue;
-                        }
-
-                        server.broadcastMsg(this, str);
                     }
                 } catch (RuntimeException e) {
                     System.out.println(e.getMessage());

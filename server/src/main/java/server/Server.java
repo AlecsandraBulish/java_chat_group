@@ -53,21 +53,25 @@ public class Server {
         }
     }
 
-    public synchronized void broadcastMsg(ClientHandler sender,String msg){
+    public  void broadcastMsg(ClientHandler sender,String msg){
         String massage = String.format("[ %s ]: %s", sender.getNickName(), msg);
         for (ClientHandler c : clients) {
             c.sendMsg(massage);
         }
     }
 
-    public synchronized void sendMsgPrivate(ClientHandler from, String nickNameTo, String msg) {
+    public void sendMsgPrivate(ClientHandler from, String nickNameTo, String msg) {
+        String message = String.format("[ %s ] to [ %s ]: %s", from.getNickName(), nickNameTo, msg);
         for (ClientHandler o : clients) {
             if (o.getNickName().equals(nickNameTo)) {
-                o.sendMsg(String.format("[ %s ]: %s",o.getNickName() , msg ));
-                from.sendMsg(msg);
+                o.sendMsg(message);
+               if (!o.equals(from)) {
+                   from.sendMsg(message);
+               }
                 return;
             }
         }
+        from.sendMsg("Not found: " + nickNameTo);
     }
 
     public void subscribe(ClientHandler clientHandler) {
