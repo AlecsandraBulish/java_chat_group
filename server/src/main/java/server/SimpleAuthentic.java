@@ -42,4 +42,15 @@ public class SimpleAuthentic implements AuthService{
         return null;
 
     }
+
+    @Override
+    public boolean registration(String log, String pass, String nick) {
+        for (UsersData user:users) {
+            if (user.login.equals(log) && user.nick.equals(nick)) {
+                return false;
+            }
+        }
+        users.add(new UsersData(nick,pass,log));
+        return true;
+    }
 }

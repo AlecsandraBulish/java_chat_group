@@ -13,10 +13,7 @@ public class ClientHandler {
     private DataInputStream in;
     private DataOutputStream out;
     private String nickName;
-
-    public Socket getSocket() {
-        return socket;
-    }
+    private String login;
 
     public ClientHandler(Server server, Socket socket) {
         try {
@@ -42,14 +39,32 @@ public class ClientHandler {
                                 continue;
                             }
                             String newNick = server.getAuthService().getNickByLoginAndPassword(token[1], token[2]);
+                            login = token[1];
                             if (newNick != null) {
-                                nickName = newNick;
-                                sendMsg(Command.AUTH_OK + " " + nickName);
-                                server.subscribe(this);
-                                System.out.println("client: " + socket.getRemoteSocketAddress() + " connected with nick: " + nickName);
-                                break;
+                                if (!server.isLoginAuthenticated(login)) {
+                                    nickName = newNick;
+                                    sendMsg(Command.AUTH_OK + " " + nickName);
+                                    server.subscribe(this);
+                                    System.out.println("client: " + socket.getRemoteSocketAddress() + " connected with nick: " + nickName);
+                                    break;
+                                } else {
+                                    sendMsg("Данная учетка уже занята");
+                                }
+
                             } else {
                                 sendMsg("Wrong login or password");
+                            }
+                        }
+                        if (str.startsWith(Command.REG)) {
+                            String[] token = str.split(" ", 4);
+                            if (token.length < 4) {
+                                continue;
+                            }
+                            boolean regSuccess = server.getAuthService().registration(token[1], token[2], token[3]);
+                            if (regSuccess) {
+                                sendMsg(Command.REG_OK);
+                            } else {
+                                sendMsg(Command.REG_NO);
                             }
                         }
                     }
@@ -57,12 +72,12 @@ public class ClientHandler {
                     while (true) {
                         String str = in.readUTF();
 
-                        if (str.startsWith("/")) {
+                        if (str.startsWith(Command.SERVICE_MSG)) {
                             if (str.equals(Command.END)) {
                                 out.writeUTF(Command.END);
                                 break;
                             }
-                            if (str.startsWith("/w")) {
+                            if (str.startsWith(Command.PRIVATE_MSG)) {
                                 String[] text = str.split(" ", 3);
                                 if (text.length < 3) {
                                     continue;
@@ -105,4 +120,7 @@ public class ClientHandler {
 
     }
 
+    public String getLogin() {
+        return login;
+    }
 }
