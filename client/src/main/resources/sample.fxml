@@ -5,18 +5,25 @@
 <?import javafx.scene.layout.VBox?>
 <?import java.net.URL?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ListView?>
 <VBox fx:controller="client.Controller"
       xmlns:fx="http://javafx.com/fxml" alignment="center" >
     <stylesheets>
         <URL value="@/css/style.css"/>
     </stylesheets>
     <HBox fx:id="authenticField">
+
         <TextField fx:id="logField"  HBox.hgrow="ALWAYS" promptText="login"/>
         <PasswordField fx:id="passField"  HBox.hgrow="ALWAYS" promptText="password" onAction="#tryToLogin"/>
         <Button text="login" onAction="#tryToLogin" minWidth="100"/>
-    </HBox>
+        <Button text="reg" onAction="#showRegWindow" minWidth="100"/>
+    </HBox >
+        <HBox VBox.vgrow="ALWAYS">
+            <TextArea fx:id="textArea" HBox.hgrow="ALWAYS" editable="false"/>
+            <ListView fx:id="listView" visible="false" managed="false" minWidth="100" onMouseReleased="#clockOnClient"/>
+        </HBox>
 
-    <TextArea fx:id="textArea" VBox.vgrow="ALWAYS"/>
+
 
     <HBox fx:id="sendMsgField" visible="false" managed="false">
         <TextField fx:id="textField" onAction="#sendOnClick" HBox.hgrow="ALWAYS" promptText="input text"/>

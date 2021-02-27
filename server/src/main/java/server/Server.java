@@ -1,9 +1,8 @@
 package server;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
+import commands.Command;
+
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
@@ -56,17 +55,54 @@ public class Server {
         }
     }
 
-    public void broadcastMsg(ClientHandler sender,String msg){
+    public  void broadcastMsg(ClientHandler sender,String msg){
         String massage = String.format("[ %s ]: %s", sender.getNickName(), msg);
         for (ClientHandler c : clients) {
             c.sendMsg(massage);
         }
     }
+
+    public void sendMsgPrivate(ClientHandler from, String nickNameTo, String msg) {
+        String message = String.format("[ %s ] to [ %s ]: %s", from.getNickName(), nickNameTo, msg);
+        for (ClientHandler o : clients) {
+            if (o.getNickName().equals(nickNameTo)) {
+                o.sendMsg(message);
+               if (!o.equals(from)) {
+                   from.sendMsg(message);
+               }
+                return;
+            }
+        }
+        from.sendMsg("Not found: " + nickNameTo);
+    }
+
     public void subscribe(ClientHandler clientHandler) {
         clients.add(clientHandler);
+        broadcastClientsList();
     }
     public void unsubscribe(ClientHandler clientHandler) {
         clients.remove(clientHandler);
+        broadcastClientsList();
     }
+    
+    public boolean isLoginAuthenticated(String login) {
+        for (ClientHandler c : clients) {
+            if (c.getLogin().equals(login)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public void broadcastClientsList() {
+        StringBuilder builder = new StringBuilder(Command.CLIENT_LIST);
+        for (ClientHandler c : clients) {
+            builder.append(" ").append(c.getNickName());
+        }
+        String msg = builder.toString();
+        for (ClientHandler c : clients) {
+            c.sendMsg(msg);
+        }
+    }
+
 
 }
