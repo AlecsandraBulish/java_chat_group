@@ -6,6 +6,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 
 public class ClientHandler {
     private Server server;
@@ -24,6 +25,7 @@ public class ClientHandler {
 
             new Thread(() -> {
                 try {
+                    socket.setSoTimeout(120000);
                     // цикл аутоинтефикации
                     while (true) {
                         String str = in.readUTF();
@@ -46,6 +48,7 @@ public class ClientHandler {
                                     sendMsg(Command.AUTH_OK + " " + nickName);
                                     server.subscribe(this);
                                     System.out.println("client: " + socket.getRemoteSocketAddress() + " connected with nick: " + nickName);
+                                    socket.setSoTimeout(0);
                                     break;
                                 } else {
                                     sendMsg("Данная учетка уже занята");
@@ -87,6 +90,13 @@ public class ClientHandler {
                         } else {
                             server.broadcastMsg(this, str);
                         }
+                    }
+                } catch (SocketTimeoutException e) {
+                    System.out.println("Время вышло");
+                    try {
+                        out.writeUTF(Command.END);
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
                     }
                 } catch (RuntimeException e) {
                     System.out.println(e.getMessage());
