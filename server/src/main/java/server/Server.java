@@ -19,6 +19,7 @@ public class Server {
 
     private List<ClientHandler> clients;
     private AuthService authService;
+    private DataAuthentic authentic;
 
     public AuthService getAuthService() {
         return authService;
@@ -26,7 +27,11 @@ public class Server {
 
     public Server() {
         clients = new CopyOnWriteArrayList<>();
-        authService = new SimpleAuthentic();
+      //  authService = new SimpleAuthentic();
+        if (!DataAuthentic.connect()) {
+            throw new  RuntimeException("haven't connected");
+        }
+       authentic =  new DataAuthentic();
 
         try {
             server = new ServerSocket(PORT);
@@ -42,6 +47,7 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
+            DataAuthentic.disconnect();
             try {
                 socket.close();
             } catch (IOException e) {
