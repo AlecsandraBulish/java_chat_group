@@ -28,10 +28,11 @@ public class Server {
     public Server() {
         clients = new CopyOnWriteArrayList<>();
       //  authService = new SimpleAuthentic();
-        if (!DataAuthentic.connect()) {
+        if (!SQLHendler.connect()) {
             throw new  RuntimeException("haven't connected");
         }
-       authentic =  new DataAuthentic();
+        authService = new DataAuthentic();
+
 
         try {
             server = new ServerSocket(PORT);
@@ -47,7 +48,7 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            DataAuthentic.disconnect();
+            SQLHendler.disconnect();
             try {
                 socket.close();
             } catch (IOException e) {

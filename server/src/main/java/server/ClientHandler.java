@@ -16,7 +16,6 @@ public class ClientHandler {
     private DataOutputStream out;
     private String nickName;
     private String login;
-    private static DataAuthentic data;
 
     public ClientHandler(Server server, Socket socket) {
         try {
@@ -38,15 +37,15 @@ public class ClientHandler {
                         }
 
                         if (str.startsWith(Command.AUTH)) {
-                            String[] token = str.split(" ");
+                            String[] token = str.split(" ",3);
                             if (token.length < 3) {
                                 continue;
                             }
                             String newNick = server.getAuthService().getNickByLoginAndPassword(token[1], token[2]);
-                            login = token[1];
-                            nickName = DataAuthentic.getNickByParams(token[1], token[2]);
+
                             System.out.println(nickName);
                             if (newNick != null) {
+                                login = token[1];
                                 if (!server.isLoginAuthenticated(login)) {
                                     nickName = newNick;
                                     sendMsg(Command.AUTH_OK + " " + nickName);
@@ -67,8 +66,6 @@ public class ClientHandler {
                             if (token.length < 4) {
                                 continue;
                             }
-
-                            DataAuthentic.registration(token[1], token[2], token[3]);
                             boolean regSuccess = server.getAuthService().registration(token[1], token[2], token[3]);
                             if (regSuccess) {
                                 sendMsg(Command.REG_OK);
@@ -109,7 +106,7 @@ public class ClientHandler {
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
-                    DataAuthentic.disconnect();
+
                     server.unsubscribe(this);
                     System.out.println("Client disconnected: " + nickName);
                     try {
