@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.sql.SQLException;
 
 public class ClientHandler {
     private Server server;
@@ -36,13 +37,15 @@ public class ClientHandler {
                         }
 
                         if (str.startsWith(Command.AUTH)) {
-                            String[] token = str.split(" ");
+                            String[] token = str.split(" ",3);
                             if (token.length < 3) {
                                 continue;
                             }
                             String newNick = server.getAuthService().getNickByLoginAndPassword(token[1], token[2]);
-                            login = token[1];
+
+                            System.out.println(nickName);
                             if (newNick != null) {
+                                login = token[1];
                                 if (!server.isLoginAuthenticated(login)) {
                                     nickName = newNick;
                                     sendMsg(Command.AUTH_OK + " " + nickName);
@@ -103,6 +106,7 @@ public class ClientHandler {
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
+
                     server.unsubscribe(this);
                     System.out.println("Client disconnected: " + nickName);
                     try {

@@ -56,7 +56,9 @@ public class Controller implements Initializable {
     private RegController regController;
 
 
+
     private String nickName;
+    private String login;
 
     public void setAuthenticated(boolean authenticated) {
         isAuthenticated = authenticated;
@@ -67,8 +69,11 @@ public class Controller implements Initializable {
         listView.setVisible(isAuthenticated);
         listView.setManaged(isAuthenticated);
 
+
+
         if (!isAuthenticated) {
             nickName = "";
+            HistoryWriter.close();
         }
         textArea.clear();
         setTitle(nickName);
@@ -111,6 +116,7 @@ public class Controller implements Initializable {
                                 String[] token = str.split(" ");
                                 nickName = token[1];
                                 setAuthenticated(true);
+                                HistoryWriter.start(login);
                                 break;
                             }
                             if (str.equals(Command.REG_OK)) {
@@ -142,6 +148,7 @@ public class Controller implements Initializable {
                             }
                         } else {
                             textArea.appendText(str + "\n");
+                            HistoryWriter.writeLine(str);
                         }
                     }
                 } catch (RuntimeException e) {
@@ -177,12 +184,14 @@ public class Controller implements Initializable {
     public void tryToLogin(ActionEvent actionEvent) {
         if (socket == null || socket.isClosed()) {
             connect();
+            login = logField.getText().trim();
         }
         try {
             out.writeUTF(String.format("%s %s %s",Command.AUTH, logField.getText().trim(), passField.getText().trim()));
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
     public void setTitle(String nickName) {
         Platform.runLater(() -> {
